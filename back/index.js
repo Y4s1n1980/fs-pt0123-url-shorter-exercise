@@ -1,32 +1,34 @@
-require('dotenv').config()
-const express = require('express')
-const cors = require('cors')
-const cookieParser = require('cookie-parser')
-const { db, cors: options } = require('./configs')
-const errors = require('./misc/errors')
+require('dotenv').config();
+const express = require('express');
+const cors = require('cors');
+const cookieParser = require('cookie-parser');
+const path = require('path');
+const { db } = require('./configs/db');
+const corsConfig = require('./configs/cors');
+const errors = require('./misc/errors');
 
-const app = express()
+const app = express();
 
-app.use(cors(options))
-app.use(express.json())
-app.use(cookieParser())
+app.use(cors(corsConfig));
+app.use(express.json());
+app.use(cookieParser());
 
-const routes = require('./routes')
+const routes = require('./routes');
 
-app.use(routes(db))
+app.use(routes(db));
 
 app.use((_, __, next) => {
-    next(errors[404])
-})
+  next(errors[404]);
+});
 
 app.use(({ statusCode, error }, _, res, __) => {
-    res.status(statusCode).json({
-        success: false,
-        message: error.message,
-    })
-})
+  res.status(statusCode).json({
+    success: false,
+    message: error.message,
+  });
+});
 
 app.listen(
-    process.env.PORT,
-    () => console.info(`> listening at: ${process.env.PORT}`)
-)
+  process.env.PORT,
+  () => console.info(`> listening at: ${process.env.PORT}`)
+);

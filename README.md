@@ -25,40 +25,35 @@ En la esquina superior derecha debería ver mi nombre de usuario junto a un icon
 ### Backend
 
 Debemos tener un nuevo modelo, "Links", para guardar todas las URLs creadas y guardar también quién creó dicha URL y cuántas veces se usa cada una. Deberá tener los siguientes campos:
-- id (uuid v4, PK)
-- short_url (text, unique not null) (solo se guarda el path de la url. Sin dominio. Piensa cómo generar una parte aleatoria, ej: "/short/aJ34vG90"
-- origin_url (text, not null) (URL original)
-- uses_by_creator (integer, default 0) (usos que ha hecho de esta url solo quien la crease)
-- uses (integer, default 0) (usos totales)
-- creation_date (date, default now)
-- created_by (users id, FK, update cascade, delete cascade)
+-id (uuid v4, PK)
+-short_url (text, unique not null) (solo se guarda el path de la url. Sin dominio. Piensa cómo generar una parte aleatoria, ej: "/short/aJ34vG90"
+-origin_url (text, not null) (URL original)
+-uses_by_creator (integer, default 0) (usos que ha hecho de esta url solo quien la crease)
+-uses (integer, default 0) (usos totales)
+-creation_date (date, default now)
+-created_by (users id, FK, update cascade, delete cascade)
 
 Crea una nuevo endpoint POST /short/generator (solo para usuarios registrados, si no lo está, 401):
-- Recibirá la URL que se quiere transformar en un body como el siguiente:
-```
-{
-  "url": "https://www.thebridge.tech"
-}
-```
+-Recibirá la URL que se quiere transformar en un body como el siguiente:`
+{"url": "https://www.thebridge.tech"}
+
 - Generará un token (busca cómo generar un token aleatorio de 8 caracteres alfanuméricos)
 - Generará una nueva entrada en la tabla "Links" con un nuevo id, short_url, origin_url, creation_date y created_by
-- La respuesta será como esta:
-```
+-La respuesta será como esta:
 {
   "success": true,
   "data": {
     "url": "/short/aJ34vG90"
   }
 }
-```
 
 Crea un nuevo endpoint GET /short/:id (puede ser usado por cualquier usuario):
-- Comprueba que los params tienen una longitud de 8 caracteres. Si no, devuelve que la URL no está bien formada
-- Busca esa url en la BBDD. Si no la encuentras, devuelve que la URL no está bien formada
-- Si encuentras la URL, obtén la "origin_url"
-- Actualiza la tabla sumando 1 a "uses"
-- Si el usuario que ha hecho la petición es el mismo usuario que está logado, suma 1 también a "uses_by_creator"
-- Devuelve una orden de redirección al cliente a la URL de la BBDD "origin_url" (busca cómo devolver un redirect a cliente)
+-Comprueba que los params tienen una longitud de 8 caracteres. Si no, devuelve que la URL no está bien formada
+-Busca esa url en la BBDD. Si no la encuentras, devuelve que la URL no está bien formada
+-Si encuentras la URL, obtén la "origin_url"
+-Actualiza la tabla sumando 1 a "uses"
+-Si el usuario que ha hecho la petición es el mismo usuario que está logado, suma 1 también a "uses_by_creator"
+-Devuelve una orden de redirección al cliente a la URL de la BBDD "origin_url" (busca cómo devolver un redirect a cliente)
 
 Modifica el endpoint para obtener la información del usuario y que satisfaga las necesidades de la parte cliente (Panel)
 
@@ -67,54 +62,54 @@ Modifica el endpoint para obtener la información del usuario y que satisfaga la
 *Empieza el proyecto pensando y maquetando siempre en móvil, luego en escritorio
 
 Debemos tener 3 páginas:
-- Register (Sin proteger, pero si estamos logados, nos redirigirá al Panel)
-- Login (Sin proteger, pero si estamos logados, nos redirigirá al Panel)
-- Panel (Protegida, si no estamos logados, nos redirigirá al Login)
+-Register (Sin proteger, pero si estamos logados, nos redirigirá al Panel)
+-Login (Sin proteger, pero si estamos logados, nos redirigirá al Panel)
+-Panel (Protegida, si no estamos logados, nos redirigirá al Login)
 
 La página "Register" contendrá un formulario:
-- Título h1 "Create account"
-- Campo email (requerido)
-- Campo username (requerido)
-- Campo password (requerido, longitud mínima de 4 caracteres)
-- Campo submit (si todo va bien, redirigir a Login)
+-Título h1 "Create account"
+-Campo email (requerido)
+-Campo username (requerido)
+-Campo password (requerido, longitud mínima de 4 caracteres)
+-Campo submit (si todo va bien, redirigir a Login)
 
 La página "Login" contendrá un formulario:
-- Título h1 "Login"
-- Campo email (requerido)
-- Campo password (requerido, longitud mínima de 4 caracteres)
-- Campo submit (si todo va bien, redirigir a Panel)
+Título h1 "Login"
+-Campo email (requerido)
+-Campo password (requerido, longitud mínima de 4 caracteres)
+-Campo submit (si todo va bien, redirigir a Panel)
 
 La página "Panel" contendrá en el centro:
-- Título h1 "Panel"
-- Campo para introducir la URL que se quiere acortar
-- Botón "Generate" (desactivado si el campo anterior está vacío)
-- Section donde aparecerá la URL generada (pon un icono al lado de un portapapeles). Este elemento será clickable y tendrá la característica de pegar la URL que contiene en el portapapeles
+-Título h1 "Panel"
+-Campo para introducir la URL que se quiere acortar
+-Botón "Generate" (desactivado si el campo anterior está vacío)
+-Section donde aparecerá la URL generada (pon un icono al lado de un portapapeles). Este elemento será clickable y tendrá la característica de pegar la URL que contiene en el portapapeles
 
 La página "Panel", debajo (derecha en escritorio) contendrá:
-- Lista con todas las URLs acortadas generadas por el usuario que está logado
-- Cada elemento será: URL, número de usos totales, número de usos del usuario logado
-- Si dejamos el cursor encima de la URL, aparecerá un tooltip (texto emergente) con la URL a la que apunta
-- Si clickamos en alguno de estos elementos, el fondo cambiará de color y le URL acortada irá a nuestro portapapeles
-- Cuando se genere una nueva URL acortada, esta lista deberá actualizarse con la nueva URL
+-Lista con todas las URLs acortadas generadas por el usuario que está logado
+-Cada elemento será: URL, número de usos totales, número de usos del usuario logado
+-Si dejamos el cursor encima de la URL, aparecerá un tooltip (texto emergente) con la URL a la que apunta
+-Si clickamos en alguno de estos elementos, el fondo cambiará de color y le URL acortada irá a nuestro portapapeles
+-Cuando se genere una nueva URL acortada, esta lista deberá actualizarse con la nueva URL
 
 La página "Panel" contendrá en la esquina superior derecha:
-- El nombre del usuario en negrita
-- Justo al lado habrá un botón o un icono de apagado
-- Haciendo click en este elemento, la aplicación mostrará un modal preguntando si deseas salir de la aplicación
-- En caso afirmativo, desconectar al usuario y redirigir a la página de Login
-- En caso negativo, solo quitar el modal
+-El nombre del usuario en negrita
+-Justo al lado habrá un botón o un icono de apagado
+-Haciendo click en este elemento, la aplicación mostrará un modal preguntando si deseas salir de la aplicación
+-En caso afirmativo, desconectar al usuario y redirigir a la página de Login
+-En caso negativo, solo quitar el modal
 
 ![image](https://github.com/TheBridge-FullStackDeveloper/fs-pt0123-url-shorter-exercise/assets/31268447/755fa4c4-5abf-40fe-ae02-598db04be9e0)
 
-## EXTRA
+##EXTRA
 
 Tienes todavía energias? Añade dos validaciones extras!
 
-### Frontend
+###Frontend
 
 Cuando el usuario pegue una URL, comprueba que al menos contenga "http://" o "https://" o busca alguna expresión regular para que valide que sea una URL válida
 
-### Backend
+###Backend
 
 Cuando te llegue una URL para generar una nueva URL corta, valida que la URL recibida llegue a algún sitio, para eso intenta obtener un statusCode de 200 haciendo una petición a dicha URL.
 Si no obtienes un código 2XX, devuelve un error
